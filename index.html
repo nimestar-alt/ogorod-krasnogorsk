@@ -1431,6 +1431,18 @@ footer {
       <div class="form-section-label">Ваши данные</div>
       <input class="form-input" type="text" id="clientName" placeholder="Имя">
       <input class="form-input" type="tel" id="clientPhone" placeholder="Телефон">
+      <div class="form-section-label">Связь с вами</div>
+      <div class="radio-group">
+        <label class="radio-opt selected" id="msg-whatsapp" onclick="selectMessenger('whatsapp')">
+          <input type="radio" name="messenger" value="whatsapp" checked>WhatsApp
+        </label>
+        <label class="radio-opt" id="msg-telegram" onclick="selectMessenger('telegram')">
+          <input type="radio" name="messenger" value="telegram">Telegram
+        </label>
+        <label class="radio-opt" id="msg-call" onclick="selectMessenger('call')">
+          <input type="radio" name="messenger" value="call">Позвонить
+        </label>
+      </div>
 
       <div class="form-section-label">Способ получения</div>
       <div class="radio-group">
@@ -1443,8 +1455,13 @@ footer {
       </div>
 
       <div id="addressBlock">
-        <div class="form-section-label">Адрес</div>
-        <input class="form-input" type="text" id="clientAddress" placeholder="Улица, дом, квартира">
+        <div class="form-section-label">Адрес доставки</div>
+        <input class="form-input" type="text" id="clientStreet" placeholder="Улица и дом">
+        <input class="form-input" type="text" id="clientApt" placeholder="Квартира">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <input class="form-input" type="text" id="clientFloor" placeholder="Этаж">
+          <input class="form-input" type="text" id="clientCode" placeholder="Код домофона">
+        </div>
       </div>
 
       <div class="form-section-label">Время доставки</div>
@@ -1469,11 +1486,24 @@ footer {
       <div class="form-section-label">Комментарий</div>
       <input class="form-input" type="text" id="clientComment" placeholder="Пожелания (необязательно)">
 
-      <div class="cart-total-row">
-        <span class="cart-total-label">Итого</span>
-        <span class="cart-total-amount" id="cartTotal">0 ₽</span>
+      <div style="padding:16px 0 0;border-top:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:0.82rem;color:var(--text-muted);font-weight:500;">Товары</span>
+          <span style="font-size:0.9rem;font-weight:600;color:var(--text);" id="cartSubtotal">0 ₽</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <span style="font-size:0.82rem;color:var(--text-muted);font-weight:500;">Доставка по городу</span>
+          <span style="font-size:0.9rem;font-weight:600;" id="cartDelivery">200 ₽</span>
+        </div>
+        <div style="background:var(--green-pale);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:0.75rem;color:var(--accent);font-weight:600;text-align:center;" id="deliveryNote">
+          До бесплатной доставки: <span id="deliveryLeft">1 000 ₽</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;border-top:1px solid var(--border);">
+          <span style="font-size:0.72rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);">Итого</span>
+          <span style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;color:var(--black);" id="cartTotal">0 ₽</span>
+        </div>
       </div>
-      <div class="min-order-note">Минимальная сумма заказа — 800 ₽ (бесплатная доставка)</div>
+      <div class="min-order-note">Доставка 200 ₽ · Бесплатно от 1 000 ₽</div>
       <button class="order-btn" onclick="sendOrder()">Оформить заказ</button>
     </div>
   </div>
@@ -1678,6 +1708,12 @@ function closeSbp() {
   document.body.style.overflow = '';
 }
 
+let selectedMessenger = 'whatsapp';
+function selectMessenger(val) {
+  selectedMessenger = val;
+  document.querySelectorAll('[id^="msg-"]').forEach(el => el.classList.remove('selected'));
+  document.getElementById('msg-'+val).classList.add('selected');
+}
 function selectPayment(val) {
   selectedPayment = val;
   document.querySelectorAll('[id^="pay-"]').forEach(el => el.classList.remove('selected'));
@@ -1784,11 +1820,18 @@ function changeQty(id, delta) {
   updateCartUI();
 }
 
-function getTotal() {
+function getSubtotal() {
   return Object.keys(cart).reduce((s,id) => {
     const p = products.find(p => p.id == id);
     return s + p.price * cart[id];
   }, 0);
+}
+function getDelivery() {
+  const sub = getSubtotal();
+  return sub >= 1000 ? 0 : (sub > 0 ? 200 : 0);
+}
+function getTotal() {
+  return getSubtotal() + getDelivery();
 }
 
 function updateCartUI() {
@@ -1817,7 +1860,26 @@ function updateCartUI() {
   }
 
   formEl.style.display = 'block';
-  document.getElementById('cartTotal').textContent = total.toLocaleString('ru-RU') + ' ₽';
+  const delivery = total >= 1000 ? 0 : (total > 0 ? 200 : 0);
+  const grandTotal = total + delivery;
+  document.getElementById('cartSubtotal').textContent = total.toLocaleString('ru-RU') + ' ₽';
+  const deliveryEl = document.getElementById('cartDelivery');
+  const noteEl = document.getElementById('deliveryNote');
+  const leftEl = document.getElementById('deliveryLeft');
+  if (delivery === 0 && total > 0) {
+    deliveryEl.textContent = 'Бесплатно';
+    deliveryEl.style.color = 'var(--accent)';
+    noteEl.style.background = 'var(--green-pale)';
+    noteEl.innerHTML = '✓ Доставка бесплатна!';
+    noteEl.style.color = 'var(--accent)';
+  } else {
+    deliveryEl.textContent = '200 ₽';
+    deliveryEl.style.color = 'var(--text)';
+    const left = 1000 - total;
+    noteEl.innerHTML = 'До бесплатной доставки: <span id="deliveryLeft">' + left.toLocaleString('ru-RU') + ' ₽</span>';
+    noteEl.style.color = 'var(--accent)';
+  }
+  document.getElementById('cartTotal').textContent = grandTotal.toLocaleString('ru-RU') + ' ₽';
 
   itemsEl.innerHTML = Object.keys(cart).map(id => {
     const p = products.find(p => p.id == id);
@@ -1841,19 +1903,31 @@ function updateCartUI() {
 function sendOrder() {
   const name = document.getElementById('clientName').value.trim();
   const phone = document.getElementById('clientPhone').value.trim();
-  const address = document.getElementById('clientAddress').value.trim();
+  const street = document.getElementById('clientStreet') ? document.getElementById('clientStreet').value.trim() : '';
+  const apt = document.getElementById('clientApt') ? document.getElementById('clientApt').value.trim() : '';
+  const floor = document.getElementById('clientFloor') ? document.getElementById('clientFloor').value.trim() : '';
+  const code = document.getElementById('clientCode') ? document.getElementById('clientCode').value.trim() : '';
+  const address = street;
   const comment = document.getElementById('clientComment').value.trim();
   if (!name) { showToast('Введите ваше имя'); return; }
   if (!phone) { showToast('Введите номер телефона'); return; }
   if (selectedDelivery === 'delivery' && !address) { showToast('Введите адрес доставки'); return; }
-  if (selectedDelivery === 'delivery' && getTotal() < 800) { showToast('Минимальная сумма доставки — 800 ₽'); return; }
+  if (selectedDelivery === 'delivery' && getSubtotal() < 300) { showToast('Минимальная сумма заказа — 300 ₽'); return; }
   const payLabels = { sbp:'СБП Сбер', transfer:'Перевод на карту', terminal:'Терминал при доставке', cash:'Наличные' };
   const delivLabel = selectedDelivery === 'delivery' ? 'Доставка' : 'Самовывоз';
   let msg = `Заказ — О\`Город\n`;
   msg += `━━━━━━━━━━━━━━━\n`;
   msg += `Имя: ${name}\nТелефон: ${phone}\n`;
   msg += `Получение: ${delivLabel}\n`;
-  if (selectedDelivery === 'delivery') msg += `Адрес: ${address}\n`;
+  if (selectedDelivery === 'delivery') {
+    let fullAddress = street;
+    if (apt) fullAddress += `, кв. ${apt}`;
+    if (floor) fullAddress += `, этаж ${floor}`;
+    if (code) fullAddress += `, домофон ${code}`;
+    msg += `Адрес: ${fullAddress}\n`;
+  }
+  const messengerLabels = { whatsapp: 'WhatsApp', telegram: 'Telegram', call: 'Позвонить' };
+  msg += `Связь: ${messengerLabels[selectedMessenger] || 'WhatsApp'}\n`;
   msg += `Время: ${selectedTime || 'не выбрано'}\n`;
   msg += `Оплата: ${payLabels[selectedPayment]}\n`;
   msg += `━━━━━━━━━━━━━━━\n`;
