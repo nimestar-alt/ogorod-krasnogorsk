@@ -1487,20 +1487,12 @@ footer {
       <input class="form-input" type="text" id="clientComment" placeholder="Пожелания (необязательно)">
 
       <div style="padding:16px 0 0;border-top:1px solid var(--border);">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:0.82rem;color:var(--text-muted);font-weight:500;">Товары</span>
-          <span style="font-size:0.9rem;font-weight:600;color:var(--text);" id="cartSubtotal">0 ₽</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-          <span style="font-size:0.82rem;color:var(--text-muted);font-weight:500;">Доставка по городу</span>
-          <span style="font-size:0.9rem;font-weight:600;" id="cartDelivery">200 ₽</span>
-        </div>
-        <div style="background:var(--green-pale);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:0.75rem;color:var(--accent);font-weight:600;text-align:center;" id="deliveryNote">
-          До бесплатной доставки: <span id="deliveryLeft">1 000 ₽</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;border-top:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;">
           <span style="font-size:0.72rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);">Итого</span>
           <span style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;color:var(--black);" id="cartTotal">0 ₽</span>
+        </div>
+        <div style="background:var(--green-pale);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:0.75rem;color:var(--accent);font-weight:600;text-align:center;" id="deliveryNote">
+          Доставка 200 ₽ · Бесплатно от 1 000 ₽
         </div>
       </div>
       <div class="min-order-note">Доставка 200 ₽ · Бесплатно от 1 000 ₽</div>
@@ -1685,6 +1677,7 @@ function selectDelivery(val) {
   document.querySelectorAll('[id^="opt-"]').forEach(el => el.classList.remove('selected'));
   document.getElementById('opt-'+val).classList.add('selected');
   document.getElementById('addressBlock').style.display = val === 'delivery' ? 'block' : 'none';
+  updateCartUI();
 }
 
 
@@ -1827,11 +1820,12 @@ function getSubtotal() {
   }, 0);
 }
 function getDelivery() {
+  if (selectedDelivery === 'pickup') return 0;
   const sub = getSubtotal();
   return sub >= 1000 ? 0 : (sub > 0 ? 200 : 0);
 }
 function getTotal() {
-  return getSubtotal() + getDelivery();
+  return getSubtotal();
 }
 
 function updateCartUI() {
@@ -1860,26 +1854,21 @@ function updateCartUI() {
   }
 
   formEl.style.display = 'block';
-  const delivery = total >= 1000 ? 0 : (total > 0 ? 200 : 0);
-  const grandTotal = total + delivery;
-  document.getElementById('cartSubtotal').textContent = total.toLocaleString('ru-RU') + ' ₽';
-  const deliveryEl = document.getElementById('cartDelivery');
   const noteEl = document.getElementById('deliveryNote');
-  const leftEl = document.getElementById('deliveryLeft');
-  if (delivery === 0 && total > 0) {
-    deliveryEl.textContent = 'Бесплатно';
-    deliveryEl.style.color = 'var(--accent)';
-    noteEl.style.background = 'var(--green-pale)';
-    noteEl.innerHTML = '✓ Доставка бесплатна!';
-    noteEl.style.color = 'var(--accent)';
-  } else {
-    deliveryEl.textContent = '200 ₽';
-    deliveryEl.style.color = 'var(--text)';
-    const left = 1000 - total;
-    noteEl.innerHTML = 'До бесплатной доставки: <span id="deliveryLeft">' + left.toLocaleString('ru-RU') + ' ₽</span>';
-    noteEl.style.color = 'var(--accent)';
+  const totalEl = document.getElementById('cartTotal');
+  if (noteEl) {
+    if (selectedDelivery === 'pickup') {
+      noteEl.innerHTML = 'Самовывоз бесплатно · ул. Светлая 3А, Эко-Станица';
+    } else if (total >= 1000) {
+      noteEl.innerHTML = 'Доставка бесплатна!';
+    } else if (total > 0) {
+      const left = 1000 - total;
+      noteEl.innerHTML = 'Доставка 200 ₽ · До бесплатной: ' + left.toLocaleString('ru-RU') + ' ₽';
+    } else {
+      noteEl.innerHTML = 'Доставка 200 ₽ · Бесплатно от 1 000 ₽';
+    }
   }
-  document.getElementById('cartTotal').textContent = grandTotal.toLocaleString('ru-RU') + ' ₽';
+  if (totalEl) totalEl.textContent = total.toLocaleString('ru-RU') + ' ₽';
 
   itemsEl.innerHTML = Object.keys(cart).map(id => {
     const p = products.find(p => p.id == id);
@@ -1939,7 +1928,7 @@ function sendOrder() {
   if (comment) msg += `\nКомментарий: ${comment}`;
   if (typeof trackPurchase === 'function') trackPurchase(getTotal());
   window.open(`https://t.me/SHARIIF34?text=${encodeURIComponent(msg)}`, '_blank');
-  if (selectedPayment === 'sbp') { setTimeout(() => openSbp(getTotal()), 600); }
+  if (selectedPayment === 'sbp') { setTimeout(() => openSbp(getSubtotal() + getDelivery()), 600); }
 
 }
 
