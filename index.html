@@ -2311,54 +2311,63 @@ function closeSuccess() {
 
 
 function startNewOrder() {
-  document.getElementById('orderSummary').classList.remove('visible');
-  document.getElementById('cartItems').parentElement.style.display = 'block';
-  document.getElementById('orderForm').style.display = 'none';
+  // Rebuild cart-body to normal state
+  var cartBody = document.querySelector('.cart-body');
+  cartBody.innerHTML = '<div class="cart-items" id="cartItems"><div class="cart-empty"><div class="cart-empty-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 3h2l2.5 8h7l1.5-5H6"/><circle cx="8.5" cy="16" r="1.5"/><circle cx="14.5" cy="16" r="1.5"/></svg></div><p>Корзина пуста</p></div></div><div class="order-form" id="orderForm" style="display:none"></div>';
   toggleCart();
 }
 
 function showCartOrderSummary(name, items, sub, deliv, date, time, payment) {
-  const dateLabel = date === 'today' ? 'Сегодня' : 'Завтра';
-  const total = sub + deliv;
-
-  // Hide normal cart content
-  document.getElementById('cartItems').style.display = 'none';
-  document.getElementById('orderForm').style.display = 'none';
+  var dateLabel = date === 'today' ? 'Сегодня' : 'Завтра';
+  var total = sub + deliv;
 
   // Build items HTML
-  let itemsHtml = '';
+  var itemsHtml = '';
   Object.keys(items).forEach(function(id) {
-    const p = products.find(function(p) { return p.id == id; });
+    var p = products.find(function(pr) { return pr.id == id; });
+    if (!p) return;
     itemsHtml += '<div class="order-summary-item">';
     itemsHtml += '<div class="order-summary-item-img">';
     if (p.img) itemsHtml += '<img src="' + p.img + '" alt="' + p.name + '">';
     itemsHtml += '</div>';
-    itemsHtml += '<div style="flex:1"><div class="order-summary-item-name">' + p.name + '</div>';
-    itemsHtml += '<div class="order-summary-item-price">' + p.weight + ' × ' + items[id] + ' = ' + (p.price * items[id]).toLocaleString('ru-RU') + ' ₽</div></div>';
-    itemsHtml += '</div>';
+    itemsHtml += '<div style="flex:1">';
+    itemsHtml += '<div class="order-summary-item-name">' + p.name + '</div>';
+    itemsHtml += '<div class="order-summary-item-price">' + p.weight + ' × ' + items[id] + ' = ' + (p.price * items[id]).toLocaleString('ru-RU') + ' ₽</div>';
+    itemsHtml += '</div></div>';
   });
-  document.getElementById('summaryItems').innerHTML = itemsHtml;
 
-  // Total block
-  let totalHtml = '<div class="order-summary-total-row"><span>Товары</span><span>' + sub.toLocaleString('ru-RU') + ' ₽</span></div>';
+  var totalHtml = '<div class="order-summary-total-row"><span>Товары</span><span>' + sub.toLocaleString('ru-RU') + ' ₽</span></div>';
   totalHtml += '<div class="order-summary-total-row"><span>Доставка</span><span>' + (deliv > 0 ? deliv + ' ₽' : 'Бесплатно') + '</span></div>';
   totalHtml += '<div class="order-summary-total-row main"><span>Итого</span><span>' + total.toLocaleString('ru-RU') + ' ₽</span></div>';
-  document.getElementById('summaryTotal').innerHTML = totalHtml;
 
-  // Info
-  document.getElementById('summaryInfo').innerHTML =
-    '<strong>' + name + '</strong> · ' + dateLabel + ', ' + time;
-
-  // SBP block
+  var sbpHtml = '';
   if (payment === 'sbp') {
-    document.getElementById('summarySbp').style.display = 'block';
-    document.getElementById('summaryAmount').textContent = 'Сумма: ' + total.toLocaleString('ru-RU') + ' ₽';
-  } else {
-    document.getElementById('summarySbp').style.display = 'none';
+    sbpHtml = '<div class="order-summary-sbp">';
+    sbpHtml += '<div style="font-size:0.72rem;color:#666;">Оплата по СБП на номер</div>';
+    sbpHtml += '<div class="order-summary-sbp-phone">+7 (926) 160-64-54</div>';
+    sbpHtml += '<div style="font-size:0.7rem;color:#888;margin-bottom:4px;">Сбербанк · Шариф Г. · Сумма: ' + total + ' ₽</div>';
+    sbpHtml += '<div class="order-summary-sbp-banks">';
+    sbpHtml += '<a href="https://www.sberbank.ru" target="_blank" class="sbp-mini-btn" style="background:#21A038;">Сбер</a>';
+    sbpHtml += '<a href="https://www.tinkoff.ru" target="_blank" class="sbp-mini-btn" style="background:#FFDD2D;color:#333;">Т-Банк</a>';
+    sbpHtml += '<a href="https://www.vtb.ru" target="_blank" class="sbp-mini-btn" style="background:#009FDF;">ВТБ</a>';
+    sbpHtml += '<a href="https://alfabank.ru" target="_blank" class="sbp-mini-btn" style="background:#EF3124;">Альфа</a>';
+    sbpHtml += '</div></div>';
   }
 
-  // Show summary inside cart
-  document.getElementById('orderSummary').classList.add('visible');
+  // Replace entire cart-body content
+  var cartBody = document.querySelector('.cart-body');
+  cartBody.innerHTML = '<div class="order-summary visible" id="orderSummary">'
+    + '<div class="order-summary-check"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+    + '<div class="order-summary-title">Заказ принят!</div>'
+    + '<div class="order-summary-sub">Мы свяжемся в течение 15 минут</div>'
+    + '<div id="summaryItems">' + itemsHtml + '</div>'
+    + '<div class="order-summary-total">' + totalHtml + '</div>'
+    + '<div class="order-summary-info"><strong>' + name + '</strong> · ' + dateLabel + ', ' + time + '</div>'
+    + sbpHtml
+    + '<button class="order-new-btn" onclick="startNewOrder()">Новый заказ</button>'
+    + '</div>';
+
+  // Open cart panel
   document.getElementById('cartPanel').classList.add('open');
   document.getElementById('cartOverlay').classList.add('open');
 }
