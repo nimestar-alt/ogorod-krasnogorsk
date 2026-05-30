@@ -1225,6 +1225,124 @@ footer {
   transition: background 0.2s;
 }
 .success-btn:hover { background: var(--accent); }
+
+.order-summary {
+  display: none;
+  padding: 20px;
+}
+.order-summary.visible { display: block; }
+.order-summary-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 4px;
+}
+.order-summary-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.order-summary-check {
+  width: 48px; height: 48px;
+  background: var(--green-pale);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.order-summary-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.order-summary-item:last-child { border-bottom: none; }
+.order-summary-item-img {
+  width: 44px; height: 44px;
+  background: var(--off-white);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.order-summary-item-img img { width:100%; height:100%; object-fit:cover; }
+.order-summary-item-name { font-size: 0.88rem; font-weight: 600; color: var(--black); }
+.order-summary-item-price { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+.order-summary-total {
+  background: var(--green-pale);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin: 16px 0;
+}
+.order-summary-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.order-summary-total-row.main {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 0;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.order-summary-info {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+.order-summary-sbp {
+  background: #f0f7ff;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.order-summary-sbp-phone {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--black);
+  margin: 6px 0 4px;
+  letter-spacing: 0.05em;
+}
+.order-summary-sbp-banks {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.sbp-mini-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: white;
+}
+.order-new-btn {
+  display: block;
+  width: 100%;
+  background: var(--black);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s;
+}
+.order-new-btn:hover { background: var(--accent); }
 </style>
 </head>
 <body>
@@ -1625,6 +1743,31 @@ footer {
     <button class="order-btn" style="margin-top:14px;" onclick="confirmPaid()">
       Я оплатил — подтвердить заказ
     </button>
+  <div class="order-summary" id="orderSummary">
+    <div class="order-summary-check">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+        <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="order-summary-title">Заказ принят!</div>
+    <div class="order-summary-sub" id="summarySubtitle">Мы свяжемся с вами в течение 15 минут</div>
+    <div id="summaryItems"></div>
+    <div class="order-summary-total" id="summaryTotal"></div>
+    <div class="order-summary-info" id="summaryInfo"></div>
+    <div id="summarySbp" style="display:none" class="order-summary-sbp">
+      <div style="font-size:0.72rem;color:#666;">Оплата по СБП на номер</div>
+      <div class="order-summary-sbp-phone">+7 (926) 160-64-54</div>
+      <div style="font-size:0.7rem;color:#888;margin-bottom:4px;">Сбербанк · Шариф Г.</div>
+      <div id="summaryAmount" style="font-size:0.85rem;font-weight:700;color:var(--accent);"></div>
+      <div class="order-summary-sbp-banks">
+        <a href="https://www.sberbank.ru" target="_blank" class="sbp-mini-btn" style="background:#21A038;">Сбер</a>
+        <a href="https://www.tinkoff.ru" target="_blank" class="sbp-mini-btn" style="background:#FFDD2D;color:#333;">Т-Банк</a>
+        <a href="https://www.vtb.ru" target="_blank" class="sbp-mini-btn" style="background:#009FDF;">ВТБ</a>
+        <a href="https://alfabank.ru" target="_blank" class="sbp-mini-btn" style="background:#EF3124;">Альфа</a>
+      </div>
+    </div>
+    <button class="order-new-btn" onclick="startNewOrder()">Новый заказ</button>
+  </div>
   </div>
 </div>
 
@@ -1820,8 +1963,7 @@ function confirmPaid() {
     getSubtotal(), getDelivery(),
     selectedDate, selectedTime
   );
-  window.open('https://t.me/SHARIIF34?text=' + encodeURIComponent(msg + '
-✅ Оплата СБП подтверждена: ' + total + ' ₽'), '_blank');
+  window.open('https://t.me/SHARIIF34?text=' + encodeURIComponent(msg + ' | Оплата СБП: ' + total + ' руб'), '_blank');
   cart = {};
   updateCartUI();
   toggleCart();
@@ -2064,42 +2206,68 @@ function sendOrder() {
   const phone = document.getElementById('clientPhone').value.trim();
   const street = document.getElementById('clientStreet') ? document.getElementById('clientStreet').value.trim() : '';
   const apt = document.getElementById('clientApt') ? document.getElementById('clientApt').value.trim() : '';
-  const floor = '';
-  const code = '';
-  const address = street;
   const comment = document.getElementById('clientComment').value.trim();
+  const address = street;
+
   if (!name) { showToast('Введите ваше имя'); return; }
   if (!phone) { showToast('Введите номер телефона'); return; }
   if (selectedDelivery === 'delivery' && !address) { showToast('Введите адрес доставки'); return; }
   if (selectedDelivery === 'delivery' && getSubtotal() < 300) { showToast('Минимальная сумма заказа — 300 ₽'); return; }
+
   const payLabels = { sbp:'СБП', terminal:'Терминал при доставке', cash:'Наличные' };
   const delivLabel = selectedDelivery === 'delivery' ? 'Доставка' : 'Самовывоз';
-  let msg = `Заказ — О-Город\n`;
-  msg += `━━━━━━━━━━━━━━━\n`;
-  msg += `Имя: ${name}\nТелефон: ${phone}\n`;
-  msg += `Получение: ${delivLabel}\n`;
-  if (selectedDelivery === 'delivery') {
-    let fullAddress = street;
-    if (apt) fullAddress += `, ${apt}`;
-    msg += `Адрес: ${fullAddress}\n`;
-  }
-  const messengerLabels = { whatsapp: 'WhatsApp', telegram: 'Telegram', call: 'Позвонить' };
-  msg += `Связь: ${messengerLabels[selectedMessenger] || 'WhatsApp'}\n`;
+  const messengerLabels = { whatsapp:'WhatsApp', telegram:'Telegram', call:'Позвонить' };
   const dateLabel = selectedDate === 'today' ? 'Сегодня' : 'Завтра';
-  msg += `Дата: ${dateLabel}\n`;
-  msg += `Время: ${selectedTime || 'не выбрано'}\n`;
-  msg += `Оплата: ${payLabels[selectedPayment]}\n`;
-  msg += `━━━━━━━━━━━━━━━\n`;
-  Object.keys(cart).forEach(id => {
-    const p = products.find(p => p.id == id);
-    msg += `${p.name} × ${cart[id]} = ${p.price*cart[id]} ₽\n`;
-  });
-  msg += `━━━━━━━━━━━━━━━\nИтого: ${getTotal().toLocaleString('ru-RU')} ₽`;
-  if (comment) msg += `\nКомментарий: ${comment}`;
-  if (typeof trackPurchase === 'function') trackPurchase(getTotal());
-  window.open(`https://t.me/SHARIIF34?text=${encodeURIComponent(msg)}`, '_blank');
-  if (selectedPayment === 'sbp') { setTimeout(() => openSbp(getSubtotal() + getDelivery()), 600); }
 
+  var nl = String.fromCharCode(10);
+  var msg = 'Zakazat O-Gorod' + nl;
+  msg += '---' + nl;
+  msg += 'Imya: ' + name + nl;
+  msg += 'Telefon: ' + phone + nl;
+  msg += 'Svyaz: ' + (messengerLabels[selectedMessenger] || 'WhatsApp') + nl;
+  msg += 'Poluchenie: ' + delivLabel + nl;
+  if (selectedDelivery === 'delivery') {
+    var fullAddress = street;
+    if (apt) fullAddress += ', ' + apt;
+    msg += 'Adres: ' + fullAddress + nl;
+  }
+  msg += 'Data: ' + dateLabel + nl;
+  msg += 'Vremya: ' + (selectedTime || 'ne vybrano') + nl;
+  msg += 'Oplata: ' + (payLabels[selectedPayment] || selectedPayment) + nl;
+  msg += '---' + nl;
+  Object.keys(cart).forEach(function(id) {
+    var p = products.find(function(p) { return p.id == id; });
+    msg += p.name + ' x' + cart[id] + ' = ' + (p.price * cart[id]) + ' rub' + nl;
+  });
+  var sub = getSubtotal();
+  var deliv = getDelivery();
+  msg += '---' + nl;
+  msg += 'Tovary: ' + sub + ' rub' + nl;
+  msg += 'Dostavka: ' + (deliv > 0 ? deliv + ' rub' : 'Besplatno') + nl;
+  msg += 'K oplate: ' + (sub + deliv) + ' rub';
+
+  // Save cart snapshot before clearing
+  var cartSnapshot = Object.assign({}, cart);
+
+  // Send to Telegram Bot API - completely silent, no popups
+  var botToken = '8599050065:AAH0oBG0vVQCOAkEHBbKIv3imdzYvzIavuM';
+  var chatId = '6746963682';
+  fetch('https://api.telegram.org/bot' + botToken + '/sendMessage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: msg,
+      parse_mode: 'HTML'
+    })
+  }).catch(function() {});
+
+  // 2. Clear cart
+  cart = {};
+  updateCartUI();
+
+  // 3. Show order summary inside cart panel
+  showCartOrderSummary(name, cartSnapshot, sub, deliv, selectedDate, selectedTime, selectedPayment);
 }
 
 function toggleCart() {
@@ -2108,23 +2276,91 @@ function toggleCart() {
 }
 
 
-function showOrderSuccess(name, subtotal, delivery, date, time) {
+function showOrderSuccess(name, subtotal, delivery, date, time, payment, total) {
   const dateLabel = date === 'today' ? 'Сегодня' : 'Завтра';
-  const total = subtotal + delivery;
   const delivLabel = delivery === 0 ? 'Бесплатно' : delivery + ' ₽';
-  document.getElementById('successDetails').innerHTML = `
-    <div class="success-detail-row"><span>Получатель</span><span>${name}</span></div>
-    <div class="success-detail-row"><span>Дата</span><span>${dateLabel}, ${time}</span></div>
-    <div class="success-detail-row"><span>Товары</span><span>${subtotal.toLocaleString('ru-RU')} ₽</span></div>
-    <div class="success-detail-row"><span>Доставка</span><span>${delivLabel}</span></div>
-    <div class="success-detail-row"><span>Итого</span><span>${total.toLocaleString('ru-RU')} ₽</span></div>
-  `;
+  let detailsHtml = '<div class="success-detail-row"><span>Получатель</span><span>' + name + '</span></div>';
+  detailsHtml += '<div class="success-detail-row"><span>Дата</span><span>' + dateLabel + ', ' + time + '</span></div>';
+  detailsHtml += '<div class="success-detail-row"><span>Товары</span><span>' + subtotal.toLocaleString('ru-RU') + ' ₽</span></div>';
+  detailsHtml += '<div class="success-detail-row"><span>Доставка</span><span>' + delivLabel + '</span></div>';
+  detailsHtml += '<div class="success-detail-row"><span>Итого</span><span>' + total.toLocaleString('ru-RU') + ' ₽</span></div>';
+
+  if (payment === 'sbp') {
+    detailsHtml += '<div style="margin-top:16px;padding:14px;background:#f0f7ff;border-radius:8px;text-align:center;">';
+    detailsHtml += '<div style="font-size:0.75rem;color:#666;margin-bottom:6px;">Оплата по СБП на номер</div>';
+    detailsHtml += '<div style="font-size:1.2rem;font-weight:700;color:#0a0a0a;margin-bottom:10px;">+7 (926) 160-64-54</div>';
+    detailsHtml += '<div style="font-size:0.72rem;color:#888;margin-bottom:12px;">Сбербанк · Шариф Г. · Сумма: ' + total + ' ₽</div>';
+    detailsHtml += '<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;">';
+    detailsHtml += '<a href="https://www.sberbank.ru" target="_blank" style="background:#21A038;color:white;padding:8px 14px;border-radius:6px;font-size:0.75rem;font-weight:700;text-decoration:none;">Сбер</a>';
+    detailsHtml += '<a href="https://www.tinkoff.ru" target="_blank" style="background:#FFDD2D;color:#333;padding:8px 14px;border-radius:6px;font-size:0.75rem;font-weight:700;text-decoration:none;">Т-Банк</a>';
+    detailsHtml += '<a href="https://www.vtb.ru" target="_blank" style="background:#009FDF;color:white;padding:8px 14px;border-radius:6px;font-size:0.75rem;font-weight:700;text-decoration:none;">ВТБ</a>';
+    detailsHtml += '<a href="https://alfabank.ru" target="_blank" style="background:#EF3124;color:white;padding:8px 14px;border-radius:6px;font-size:0.75rem;font-weight:700;text-decoration:none;">Альфа</a>';
+    detailsHtml += '</div>';
+    detailsHtml += '<div style="font-size:0.68rem;color:#aaa;margin-top:10px;">Откройте своё банковское приложение, перейдите в раздел СБП и введите номер</div>';
+    detailsHtml += '</div>';
+  }
+
+  document.getElementById('successDetails').innerHTML = detailsHtml;
   document.getElementById('orderSuccess').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 function closeSuccess() {
   document.getElementById('orderSuccess').classList.remove('open');
   document.body.style.overflow = '';
+}
+
+
+function startNewOrder() {
+  document.getElementById('orderSummary').classList.remove('visible');
+  document.getElementById('cartItems').parentElement.style.display = 'block';
+  document.getElementById('orderForm').style.display = 'none';
+  toggleCart();
+}
+
+function showCartOrderSummary(name, items, sub, deliv, date, time, payment) {
+  const dateLabel = date === 'today' ? 'Сегодня' : 'Завтра';
+  const total = sub + deliv;
+
+  // Hide normal cart content
+  document.getElementById('cartItems').style.display = 'none';
+  document.getElementById('orderForm').style.display = 'none';
+
+  // Build items HTML
+  let itemsHtml = '';
+  Object.keys(items).forEach(function(id) {
+    const p = products.find(function(p) { return p.id == id; });
+    itemsHtml += '<div class="order-summary-item">';
+    itemsHtml += '<div class="order-summary-item-img">';
+    if (p.img) itemsHtml += '<img src="' + p.img + '" alt="' + p.name + '">';
+    itemsHtml += '</div>';
+    itemsHtml += '<div style="flex:1"><div class="order-summary-item-name">' + p.name + '</div>';
+    itemsHtml += '<div class="order-summary-item-price">' + p.weight + ' × ' + items[id] + ' = ' + (p.price * items[id]).toLocaleString('ru-RU') + ' ₽</div></div>';
+    itemsHtml += '</div>';
+  });
+  document.getElementById('summaryItems').innerHTML = itemsHtml;
+
+  // Total block
+  let totalHtml = '<div class="order-summary-total-row"><span>Товары</span><span>' + sub.toLocaleString('ru-RU') + ' ₽</span></div>';
+  totalHtml += '<div class="order-summary-total-row"><span>Доставка</span><span>' + (deliv > 0 ? deliv + ' ₽' : 'Бесплатно') + '</span></div>';
+  totalHtml += '<div class="order-summary-total-row main"><span>Итого</span><span>' + total.toLocaleString('ru-RU') + ' ₽</span></div>';
+  document.getElementById('summaryTotal').innerHTML = totalHtml;
+
+  // Info
+  document.getElementById('summaryInfo').innerHTML =
+    '<strong>' + name + '</strong> · ' + dateLabel + ', ' + time;
+
+  // SBP block
+  if (payment === 'sbp') {
+    document.getElementById('summarySbp').style.display = 'block';
+    document.getElementById('summaryAmount').textContent = 'Сумма: ' + total.toLocaleString('ru-RU') + ' ₽';
+  } else {
+    document.getElementById('summarySbp').style.display = 'none';
+  }
+
+  // Show summary inside cart
+  document.getElementById('orderSummary').classList.add('visible');
+  document.getElementById('cartPanel').classList.add('open');
+  document.getElementById('cartOverlay').classList.add('open');
 }
 
 function showToast(msg) {
