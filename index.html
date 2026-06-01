@@ -1621,6 +1621,7 @@ footer {
       <div class="form-section-label">Ваши данные</div>
       <input class="form-input" type="text" id="clientName" placeholder="Имя">
       <input class="form-input" type="tel" id="clientPhone" placeholder="Телефон">
+      <input class="form-input" type="text" id="clientTelegram" placeholder="Telegram @username (необязательно)">
       <div class="form-section-label">Связь с вами</div>
       <div class="radio-group">
         <label class="radio-opt selected" id="msg-whatsapp" onclick="selectMessenger('whatsapp')">
@@ -2232,6 +2233,8 @@ function sendOrder() {
   var msg = 'Zakazat O-Gorod' + nl;
   msg += '---' + nl;
   msg += 'Imya: ' + name + nl;
+  var tg = document.getElementById('clientTelegram') ? document.getElementById('clientTelegram').value.trim() : '';
+  if (tg) msg += 'Telegram: ' + tg + nl;
   msg += 'Telefon: ' + phone + nl;
   msg += 'Svyaz: ' + (messengerLabels[selectedMessenger] || 'WhatsApp') + nl;
   msg += 'Poluchenie: ' + delivLabel + nl;
